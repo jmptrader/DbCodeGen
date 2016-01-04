@@ -1,0 +1,11 @@
+﻿{
+  "connection": {
+    "connection-string": "Server=.;Database=TavantMLS;User ID=sa;Password=sa",
+    "type": "System.Data.SqlClient"
+  },
+  "code": {
+    "namespace": "Tavant.Mls.Repository",
+    "wrapper-class": "DbMetadata"
+  },
+  "output": ""
+}
