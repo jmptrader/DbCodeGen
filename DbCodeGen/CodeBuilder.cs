@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Database.CodeGen
@@ -31,7 +32,6 @@ namespace Database.CodeGen
                 Line($"public static class {_config.Code.WrapperClass}").Line("{");
 
             GenerateTables();
-            GenerateColumns();
 
             if (hasWrapper)
                 Line("}");
@@ -48,41 +48,38 @@ namespace Database.CodeGen
                 .AsEnumerable()
                 .OrderBy(row => (string)row[2])
                 .GroupBy(row => (string)row[1]);
-            foreach (IGrouping<string, DataRow> schema in schemas)
-            {
-                Line($"public static class {schema.Key}").Line("{");
-                foreach (DataRow table in schema)
-                    Line($@"public const string {table[2]} = ""{table[2]}"";");
-                Line("}");
-            }
-        }
-
-        private void GenerateColumns()
-        {
-            List<DataRow> columns = _connection.GetSchema("Columns")
+            var columns = _connection.GetSchema("Columns")
                 .AsEnumerable()
                 .OrderBy(row => (string)row[0])
                 .ThenBy(row => (string)row[1])
                 .ThenBy(row => (string)row[2])
-                .ThenBy(row => (int)row[4])
-                .ToList();
+                .ThenBy(row => (int)row[4]);
 
-            string previousId = null;
-            foreach (DataRow column in columns)
+            foreach (IGrouping<string, DataRow> schema in schemas)
             {
-                string currentId = $"{column[0]}.{column[1]}.{column[2]}";
-                if (currentId != previousId)
+                Line($"public static class {schema.Key}").Line("{");
+                foreach (DataRow table in schema)
                 {
-                    if (previousId != null)
-                        Line("}");
-                    Line($"public static class {column[2]}").Line("{");
-                    previousId = currentId;
-                }
+                    string tableName = (string)table[2];
+                    Line($@"public const string {tableName}_Table = ""[{schema.Key}].[{tableName}]"";");
 
-                Line($@"public const string {column[3]} = ""{column[3]}"";");
-            }
-            if (columns.Count > 0)
+                    GenerateColumns(schema.Key, tableName, columns);
+                }
                 Line("}");
+            }
+        }
+
+        private void GenerateColumns(string schema, string table, IEnumerable<DataRow> columns)
+        {
+            var tableColumns = from column in columns
+                               where column.Field<string>(1) == schema && column.Field<string>(2) == table
+                               orderby column.Field<int>(4)
+                               select column.Field<string>(3);
+
+            Line($"public static class {table}").Line("{");
+            foreach (string tableColumn in tableColumns)
+                Line($@"public const string {tableColumn} = ""[{tableColumn}]"";");
+            Line("}");
         }
 
         private CodeBuilder Line(string line)

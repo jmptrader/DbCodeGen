@@ -5,7 +5,7 @@
   },
   "code": {
     "namespace": "Tavant.Mls.Repository",
-    "wrapper-class": "DbMetadata"
+    "wrapper-class": ""
   },
   "output": ""
 }
