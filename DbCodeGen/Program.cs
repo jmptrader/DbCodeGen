@@ -29,14 +29,14 @@ namespace Database.CodeGen
             Console.WriteLine($"Connection string: {config.Connection.ConnectionString}");
             Console.WriteLine($"Connection type  : {config.Connection.Type}");
             Console.WriteLine($"Output           : {outputFilePath4TableProperties}");
-            
+
             using (DbConnection connection = await CreateConnection(config))
             {
-               var builder4Properties = new CodeBulderForTablefParameters(connection, config);
-               string code4Properties = builder4Properties.Generate();
-               File.WriteAllText(outputFilePath4TableProperties, code4Properties);
-               Console.WriteLine(code4Properties);
-               Console.WriteLine($"Output           : {outputFilePath4ModelClass}");
+                var builder4Properties = new CodeBulderForTablefParameters(connection, config);
+                string code4Properties = builder4Properties.Generate();
+                File.WriteAllText(outputFilePath4TableProperties, code4Properties);
+                Console.WriteLine(code4Properties);
+                Console.WriteLine($"Output           : {outputFilePath4ModelClass}");
                 var builder4Model = new CodeBuilderForModelClass(connection, config);
                 string code4Model = builder4Model.Generate();
                 File.WriteAllText(outputFilePath4TableProperties, code4Model);

@@ -27,7 +27,7 @@ namespace Database.CodeGen
                 foreach (DataRow table in schema)
                 {
                     var tableName = (string)table[2];
-                    
+
                     Line($@"public const string {tableName}_Table = ""[{schema.Key}].[{tableName}]"";");
                     GenearateClass(schema.Key, tableName, columns);
                 }

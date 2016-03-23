@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Database.CodeGen
 {
-     
-    internal class  CodeBuilderForModelClass: CodeBuilder 
+
+    internal class CodeBuilderForModelClass : CodeBuilder
     {
         internal CodeBuilderForModelClass(DbConnection connection, Config config) : base(connection, config)
         {
@@ -17,14 +17,14 @@ namespace Database.CodeGen
         }
         protected override void GenerateTables()
         {
-            var schemas = GetSchemaDetails(); 
+            var schemas = GetSchemaDetails();
             IEnumerable<DataRow> columns = GetRowDetails();
             foreach (IGrouping<string, DataRow> schema in schemas)
-            { 
+            {
                 foreach (DataRow table in schema)
                 {
                     var tableName = (string)table[2];
-                    GenearateClass(schema.Key, tableName, columns); 
+                    GenearateClass(schema.Key, tableName, columns);
                 }
             }
         }
@@ -53,6 +53,6 @@ namespace Database.CodeGen
                 Line("}");
             }
         }
-         
+
     }
 }
