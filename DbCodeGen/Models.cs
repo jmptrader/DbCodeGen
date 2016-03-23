@@ -23,10 +23,7 @@ namespace Database.CodeGen
     {
         internal IndexKind IndexKind { get; set; }
     }
-}
 
-namespace Database.CodeGen
-{
     internal enum IndexKind
     {
         Unique,

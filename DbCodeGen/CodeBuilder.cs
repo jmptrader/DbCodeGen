@@ -5,6 +5,8 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 
+using NodaTime;
+
 namespace Database.CodeGen
 {
     internal abstract class CodeBuilder
@@ -75,12 +77,14 @@ namespace Database.CodeGen
             {"decimal", typeof (double)},
             {"money", typeof (decimal)},
             {"uniqueidentifier", typeof (Guid)},
-            {"binary", typeof(byte[]) }
+            {"binary", typeof(byte[]) },
+            {"date", typeof(LocalDate) },
+            {"time", typeof(LocalTime) },
+            {"datetime", typeof(Instant) },
+            {"datetime2", typeof(Instant) },
         };
 
         private static readonly Dictionary<string, Type> _containsColumnMappings = new Dictionary<string, Type> {
-            {"date", typeof (DateTime)},
-            {"time", typeof (DateTime)},
             {"char", typeof (string)}
         };
 
@@ -90,6 +94,7 @@ namespace Database.CodeGen
         {
             ILookup<string, Table> schemas = _connection.GetSchema("Tables")
                 .AsEnumerable()
+                .Where(row => !_config.Code.ExcludeSchemas.Any(s => s.Equals(row.Field<string>(1), StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(row => row.Field<string>(2))
                 .ToLookup(row => row.Field<string>(1), row => new Table {
                     Schema = row.Field<string>(1),
