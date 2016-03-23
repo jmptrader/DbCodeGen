@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+
+using Newtonsoft.Json;
 
 namespace Database.CodeGen
 {
@@ -30,5 +32,8 @@ namespace Database.CodeGen
 
         [JsonProperty("wrapper-class")]
         public string WrapperClass { get; set; }
+
+        [JsonProperty("exclude-schemas")]
+        public List<string> ExcludeSchemas { get; } = new List<string>();
     }
 }

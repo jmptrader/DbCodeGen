@@ -4,8 +4,11 @@
     "type": "System.Data.SqlClient"
   },
   "code": {
-    "namespace": "Tavant.Mls.Repository",
-    "wrapper-class": ""
+    "namespace": "Tavant.Internals.Cafeteria.Repository",
+    "wrapper-class": "",
+    "exclude-schemas": [
+      "dbo"
+    ]
   },
   "output": ""
 }
