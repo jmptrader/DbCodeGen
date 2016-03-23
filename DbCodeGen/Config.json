@@ -1,6 +1,6 @@
 ﻿{
   "connection": {
-    "connection-string": "Server=.;Database=TavantMLS;User ID=sa;Password=sa",
+    "connection-string": "Server=.;Database=OnlineExam;User ID=sa;Password=sa",
     "type": "System.Data.SqlClient"
   },
   "code": {

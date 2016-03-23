@@ -24,18 +24,23 @@ namespace Database.CodeGen
 
             Config config = ReadConfig(configFilePath);
 
-            string outputFilePath = !string.IsNullOrWhiteSpace(config.Output) ? config.Output : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
-
+            string outputFilePath4TableProperties = !string.IsNullOrWhiteSpace(config.Output) ? config.Output : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
+            string outputFilePath4ModelClass = !string.IsNullOrWhiteSpace(config.Output) ? config.Output : Path.Combine(Directory.GetCurrentDirectory(), "ModelMetadata.cs");
             Console.WriteLine($"Connection string: {config.Connection.ConnectionString}");
             Console.WriteLine($"Connection type  : {config.Connection.Type}");
-            Console.WriteLine($"Output           : {outputFilePath}");
-
+            Console.WriteLine($"Output           : {outputFilePath4TableProperties}");
+            
             using (DbConnection connection = await CreateConnection(config))
             {
-                var builder = new CodeBuilder(connection, config);
-                string code = builder.Generate();
-                File.WriteAllText(outputFilePath, code);
-                Console.WriteLine(code);
+               var builder4Properties = new CodeBulderForTablefParameters(connection, config);
+               string code4Properties = builder4Properties.Generate();
+               File.WriteAllText(outputFilePath4TableProperties, code4Properties);
+               Console.WriteLine(code4Properties);
+               Console.WriteLine($"Output           : {outputFilePath4ModelClass}");
+                var builder4Model = new CodeBuilderForModelClass(connection, config);
+                string code4Model = builder4Model.Generate();
+                File.WriteAllText(outputFilePath4TableProperties, code4Model);
+                Console.WriteLine(code4Model);
             }
         }
 
