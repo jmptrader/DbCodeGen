@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Database.CodeGen
 {
     internal abstract class CodeBuilder
     {
-        protected readonly DbConnection _connection;
-        protected readonly Config _config;
-        protected readonly StringBuilder _code = new StringBuilder();
-        protected int _indent = 0;
+        private readonly DbConnection _connection;
+        private readonly Config _config;
+        private readonly StringBuilder _code = new StringBuilder();
+        private int _indent;
 
         internal CodeBuilder(DbConnection connection, Config config)
         {
@@ -35,7 +34,7 @@ namespace Database.CodeGen
             if (hasWrapper)
                 Line($"public static class {_config.Code.WrapperClass}").Line("{");
 
-            GenerateTables();
+            GenerateCode();
 
             if (hasWrapper)
                 Line("}");
@@ -46,8 +45,7 @@ namespace Database.CodeGen
             return _code.ToString();
         }
 
-        protected abstract void GenerateTables();
-        protected abstract void GenearateClass(string schema, string table, IEnumerable<DataRow> columns);
+        protected abstract void GenerateCode();
 
         protected CodeBuilder Line(string line)
         {
@@ -58,60 +56,95 @@ namespace Database.CodeGen
                 _indent += 4;
             return this;
         }
-        protected CodeBuilder LineToProperty(string line)
+
+        private static Type GetDataColumnType(string type)
         {
-            _indent += 4;
-            _code.AppendLine($"{Indent}{line}");
-            _indent -= 4;
-            return this;
-        }
-        protected string DataColumnType(string type)
-        {
-            if (type == "bit")
-            {
-                return ("bool");
-            }
-            else if (type == "decimal")
-            {
-                return ("float");
-            }
-            else if (type == "uniqueidentifier")
-            {
-                return ("Guid");
-            }
-            else if (type.Contains("date") || type.Contains("time"))
-            {
-                return ("DateTime");
-            }
-            else if (type.Contains("varchar"))
-            {
-                return ("string");
-            }
-            else
-            {
-                return type;
-            }
+            Type dataType;
+            if (_directColumnMappings.TryGetValue(type, out dataType))
+                return dataType;
+            dataType = _containsColumnMappings
+                .FirstOrDefault(kvp => type.Contains(kvp.Key))
+                .Value;
+            return dataType ?? typeof (object);
         }
 
-        protected string Indent => new string(' ', _indent);
+        private static readonly Dictionary<string, Type> _directColumnMappings = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase) {
+            {"bit", typeof (bool)},
+            {"int", typeof (int)},
+            {"numeric", typeof (double)},
+            {"decimal", typeof (double)},
+            {"money", typeof (decimal)},
+            {"uniqueidentifier", typeof (Guid)},
+            {"binary", typeof(byte[]) }
+        };
 
-        protected IEnumerable<DataRow> GetRowDetails()
+        private static readonly Dictionary<string, Type> _containsColumnMappings = new Dictionary<string, Type> {
+            {"date", typeof (DateTime)},
+            {"time", typeof (DateTime)},
+            {"char", typeof (string)}
+        };
+
+        private string Indent => new string(' ', _indent);
+
+        protected ILookup<string, Table> GetSchemaDetails()
         {
-            return _connection.GetSchema("Columns")
-               .AsEnumerable()
-               .OrderBy(row => (string)row[0])
-               .ThenBy(row => (string)row[1])
-               .ThenBy(row => (string)row[2])
-               .ThenBy(row => (int)row[4]);
-        }
-        protected IEnumerable<IGrouping<string, DataRow>> GetSchemaDetails()
-        {
-            return _connection.GetSchema("Tables")
+            ILookup<string, Table> schemas = _connection.GetSchema("Tables")
                 .AsEnumerable()
-                .OrderBy(row => (string)row[2])
-                .GroupBy(row => (string)row[1]);
+                .OrderBy(row => row.Field<string>(2))
+                .ToLookup(row => row.Field<string>(1), row => new Table {
+                    Schema = row.Field<string>(1),
+                    Name = row.Field<string>(2)
+                });
+            return schemas;
         }
 
+        protected IEnumerable<Column> GetColumnDetails(bool getIndexDetails)
+        {
+            EnumerableRowCollection<DataRow> indexColumns = null;
+            if (getIndexDetails)
+            {
+                indexColumns = _connection.GetSchema("IndexColumns").AsEnumerable()
+                    .OrderBy(row => row.Field<string>(4)) //Schema
+                    .ThenBy(row => row.Field<string>(5)) //Table
+                    .ThenBy(row => row.Field<int>(7)); //Ordinal
+            }
 
+            return _connection.GetSchema("Columns").AsEnumerable()
+                .Select(row => {
+                    Column column = null;
+
+                    var schema = row.Field<string>(1);
+                    var table = row.Field<string>(2);
+                    var name = row.Field<string>(3);
+
+                    if (getIndexDetails && indexColumns != null)
+                    {
+                        DataRow indexRow = indexColumns.FirstOrDefault(r =>
+                            schema.Equals(r.Field<string>(4)) &&
+                                table.Equals(r.Field<string>(5)) &&
+                                name.Equals(r.Field<string>(6)));
+                        if (indexRow != null)
+                        {
+                            column = new IndexedColumn {
+                                IndexKind = indexRow.Field<byte>(8) == 36 ? IndexKind.PrimaryKey : IndexKind.Unique
+                            };
+                        }
+                    }
+
+                    if (column == null)
+                        column = new Column();
+
+                    column.Schema = schema;
+                    column.Table = table;
+                    column.Name = name;
+                    column.Ordinal = row.Field<int>(4);
+                    column.IsNullable = row.Field<string>(6).Equals("YES", StringComparison.OrdinalIgnoreCase);
+                    column.Type = GetDataColumnType(row.Field<string>(7));
+                    column.DbType = row.Field<string>(7);
+
+                    return column;
+                })
+                .OrderBy(c => c.Schema).ThenBy(c => c.Table).ThenBy(c => c.Ordinal);
+        }
     }
 }

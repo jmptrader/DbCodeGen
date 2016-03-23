@@ -13,7 +13,7 @@ namespace Database.CodeGen
         public Config_Code Code { get; set; }
 
         [JsonProperty("output")]
-        public string Output { get; set; }
+        public Config_Output Output { get; set; }
     }
 
     public sealed class Config_Connection
@@ -35,5 +35,14 @@ namespace Database.CodeGen
 
         [JsonProperty("exclude-schemas")]
         public List<string> ExcludeSchemas { get; } = new List<string>();
+    }
+
+    public sealed class Config_Output
+    {
+        [JsonProperty("constants")]
+        public string Constants { get; set; }
+
+        [JsonProperty("entities")]
+        public string Entities { get; set; }
     }
 }

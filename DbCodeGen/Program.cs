@@ -24,23 +24,24 @@ namespace Database.CodeGen
 
             Config config = ReadConfig(configFilePath);
 
-            string outputFilePath4TableProperties = !string.IsNullOrWhiteSpace(config.Output) ? config.Output : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
-            string outputFilePath4ModelClass = !string.IsNullOrWhiteSpace(config.Output) ? config.Output : Path.Combine(Directory.GetCurrentDirectory(), "ModelMetadata.cs");
+            string constantsOutputPath = !string.IsNullOrWhiteSpace(config.Output.Constants) ? config.Output.Entities : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
+            string entitiesOutputPath = !string.IsNullOrWhiteSpace(config.Output.Entities) ? config.Output.Entities : Path.Combine(Directory.GetCurrentDirectory(), "DbEntities.cs");
             Console.WriteLine($"Connection string: {config.Connection.ConnectionString}");
             Console.WriteLine($"Connection type  : {config.Connection.Type}");
-            Console.WriteLine($"Output           : {outputFilePath4TableProperties}");
+            Console.WriteLine($"Constants output : {constantsOutputPath}");
+            Console.WriteLine($"Entities output  : {entitiesOutputPath}");
 
             using (DbConnection connection = await CreateConnection(config))
             {
-                var builder4Properties = new CodeBulderForTablefParameters(connection, config);
-                string code4Properties = builder4Properties.Generate();
-                File.WriteAllText(outputFilePath4TableProperties, code4Properties);
-                Console.WriteLine(code4Properties);
-                Console.WriteLine($"Output           : {outputFilePath4ModelClass}");
-                var builder4Model = new CodeBuilderForModelClass(connection, config);
-                string code4Model = builder4Model.Generate();
-                File.WriteAllText(outputFilePath4TableProperties, code4Model);
-                Console.WriteLine(code4Model);
+                var constantsBuilder = new ConstantsCodeBulder(connection, config);
+                string constantsCode = constantsBuilder.Generate();
+                File.WriteAllText(constantsOutputPath, constantsCode);
+                Console.WriteLine(constantsCode);
+
+                var entitiesBuilder = new EntityCodeBuilder(connection, config);
+                string entitiesCode = entitiesBuilder.Generate();
+                File.WriteAllText(entitiesOutputPath, entitiesCode);
+                Console.WriteLine(entitiesCode);
             }
         }
 
@@ -76,20 +77,6 @@ namespace Database.CodeGen
             connection.ConnectionString = config.Connection.ConnectionString;
             await connection.OpenAsync();
             return connection;
-        }
-    }
-
-    public static class Tables
-    {
-        public static class dbo
-        {
-            public const string Roles = "[dbo].[Roles]";
-        }
-
-        public static class Roles
-        {
-            public const string Id = "[Id]";
-            public const string Name = "[Name]";
         }
     }
 }

@@ -48,9 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeBuilder.cs" />
-    <Compile Include="CodeBuilderForModelClass.cs" />
-    <Compile Include="CodeBulderForTablefParameters.cs" />
+    <Compile Include="EntityCodeBuilder.cs" />
+    <Compile Include="ConstantsCodeBulder.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Models.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
