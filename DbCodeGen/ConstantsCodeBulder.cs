@@ -12,6 +12,13 @@ namespace Database.CodeGen
 
         protected override void GenerateCode()
         {
+            bool hasWrapper = !string.IsNullOrWhiteSpace(Config.Code.WrapperClass);
+            if (hasWrapper)
+            {
+                Line($"public static class {Config.Code.WrapperClass}");
+                Line("{");
+            }
+
             ILookup<string, Table> schemas = GetSchemaDetails();
             IEnumerable<Column> columns = GetColumnDetails(getIndexDetails: false);
 
@@ -28,6 +35,9 @@ namespace Database.CodeGen
 
                 Line("}");
             }
+
+            if (hasWrapper)
+                Line("}");
         }
 
         private void GenerateClassFor(string schema, string table, IEnumerable<Column> columns)

@@ -35,6 +35,9 @@ namespace Database.CodeGen
 
         [JsonProperty("exclude-schemas")]
         public List<string> ExcludeSchemas { get; } = new List<string>();
+
+        [JsonProperty("entity-suffix")]
+        public string EntitySuffix { get; set; }
     }
 
     public sealed class Config_Output

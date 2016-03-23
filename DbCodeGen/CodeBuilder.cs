@@ -12,34 +12,27 @@ namespace Database.CodeGen
     internal abstract class CodeBuilder
     {
         private readonly DbConnection _connection;
-        private readonly Config _config;
+        protected Config Config { get; }
         private readonly StringBuilder _code = new StringBuilder();
         private int _indent;
 
         internal CodeBuilder(DbConnection connection, Config config)
         {
             _connection = connection;
-            _config = config;
+            Config = config;
         }
 
         internal string Generate()
         {
-            bool hasNamespace = !string.IsNullOrWhiteSpace(_config.Code.Ns);
+            bool hasNamespace = !string.IsNullOrWhiteSpace(Config.Code.Ns);
             if (hasNamespace)
             {
                 Line("using NodaTime;");
                 Line("");
-                Line($"namespace {_config.Code.Ns}").Line("{");
+                Line($"namespace {Config.Code.Ns}").Line("{");
             }
 
-            bool hasWrapper = !string.IsNullOrWhiteSpace(_config.Code.WrapperClass);
-            if (hasWrapper)
-                Line($"public static class {_config.Code.WrapperClass}").Line("{");
-
             GenerateCode();
-
-            if (hasWrapper)
-                Line("}");
 
             if (hasNamespace)
                 Line("}");
@@ -94,7 +87,7 @@ namespace Database.CodeGen
         {
             ILookup<string, Table> schemas = _connection.GetSchema("Tables")
                 .AsEnumerable()
-                .Where(row => !_config.Code.ExcludeSchemas.Any(s => s.Equals(row.Field<string>(1), StringComparison.OrdinalIgnoreCase)))
+                .Where(row => !Config.Code.ExcludeSchemas.Any(s => s.Equals(row.Field<string>(1), StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(row => row.Field<string>(2))
                 .ToLookup(row => row.Field<string>(1), row => new Table {
                     Schema = row.Field<string>(1),

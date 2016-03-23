@@ -29,7 +29,7 @@ namespace Database.CodeGen
                 select col;
 
             Line("");
-            Line($"public sealed class {table}Entity");
+            Line($"public sealed class {table}{Config.Code.EntitySuffix ?? string.Empty}");
             Line("{");
             foreach (Column tableColumn in tableColumns)
             {
