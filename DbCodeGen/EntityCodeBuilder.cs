@@ -36,7 +36,7 @@ namespace Database.CodeGen
                 bool isNullable = tableColumn.IsNullable ||
                     (tableColumn as IndexedColumn)?.IndexKind == IndexKind.PrimaryKey;
                 string nullChar = tableColumn.Type.IsValueType && isNullable ? "?" : string.Empty;
-                Line($"public {tableColumn.Type.FullName}{nullChar} {tableColumn.Name} {{ get; set }}");
+                Line($"public {tableColumn.Type.FullName}{nullChar} {tableColumn.Name} {{ get; set; }}");
                 if (tableColumn.Type == typeof (object))
                     Line($"--- {tableColumn.DbType}");
             }

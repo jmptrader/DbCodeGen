@@ -24,7 +24,7 @@ namespace Database.CodeGen
 
             Config config = ReadConfig(configFilePath);
 
-            string constantsOutputPath = !string.IsNullOrWhiteSpace(config.Output.Constants) ? config.Output.Entities : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
+            string constantsOutputPath = !string.IsNullOrWhiteSpace(config.Output.Constants) ? config.Output.Constants : Path.Combine(Directory.GetCurrentDirectory(), "DbMetadata.cs");
             string entitiesOutputPath = !string.IsNullOrWhiteSpace(config.Output.Entities) ? config.Output.Entities : Path.Combine(Directory.GetCurrentDirectory(), "DbEntities.cs");
             Console.WriteLine($"Connection string: {config.Connection.ConnectionString}");
             Console.WriteLine($"Connection type  : {config.Connection.Type}");

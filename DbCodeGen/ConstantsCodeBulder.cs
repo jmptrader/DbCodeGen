@@ -52,6 +52,12 @@ namespace Database.CodeGen
             foreach (string columnName in columnNames)
                 Line($@"public const string {columnName} = ""[{columnName}]"";");
             Line("}");
+            Line("");
+            Line($"public static class {table}P");
+            Line("{");
+            foreach (string columnName in columnNames)
+                Line($@"public const string {columnName} = ""@{columnName}"";");
+            Line("}");
         }
     }
 }

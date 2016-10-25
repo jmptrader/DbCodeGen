@@ -1,10 +1,10 @@
 ﻿{
   "connection": {
-    "connection-string": "Server=.;Database=TavantMLS;User ID=sa;Password=sa",
+    "connection-string": "Server=.;Database=OnlineExam;User ID=sa;Password=sa",
     "type": "System.Data.SqlClient"
   },
   "code": {
-    "namespace": "Tavant.Internals.Cafeteria.Repository",
+    "namespace": "Tavant.Internals.TestTaker.Repository",
     "wrapper-class": "",
     "exclude-schemas": [
       "dbo"
@@ -12,7 +12,7 @@
     "entity-suffix": "_Entity"
   },
   "output": {
-    "constants": "",
-    "entities":  ""
+    "constants": "D:\\Tavant\\Internals\\testtaker\\Repository\\DbConstants.cs",
+    "entities": "D:\\Tavant\\Internals\\testtaker\\Repository\\DbEntities.cs"
   }
 }

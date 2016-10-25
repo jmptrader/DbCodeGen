@@ -66,6 +66,7 @@ namespace Database.CodeGen
         private static readonly Dictionary<string, Type> _directColumnMappings = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase) {
             {"bit", typeof (bool)},
             {"int", typeof (int)},
+            {"tinyint", typeof (byte)},
             {"numeric", typeof (double)},
             {"decimal", typeof (double)},
             {"money", typeof (decimal)},
